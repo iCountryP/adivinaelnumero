@@ -17,7 +17,6 @@ import android.content.Intent
 import org.w3c.dom.Text
 
 class MainActivity : AppCompatActivity() {
-    var numeroRandom: Int = (Math.random() * 100 + 1).toInt() // 1 to 100
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -34,25 +33,25 @@ class MainActivity : AppCompatActivity() {
         val etNumber = findViewById<EditText>(R.id.etNumber)
         // Variable que maneja el botón que envía el núm
         val sendNumber = findViewById<Button>(R.id.sendNumber)
-        // INT de numero de intentos. Se actualiza con ++ cada vez q le da al botón
-        var numeroIntentos = 0
+
         // Variable que gestiona el TEXTO de intentos
         val intentos = findViewById<TextView>(R.id.tvIntentos)
+        intentos.setText("INTENTOS: " + numeroIntentos)
 
         // Scroll View (scrollView -> Contiene textoHistorial / textoHistorial -> Texto donde sale info)
         val scrollView = findViewById<ScrollView>(R.id.scrollView2) // Variable que maneja el scrollView
         val textoHistorial = findViewById<TextView>(R.id.textoHistorial) // Variable que gestiona el TEXTO del historial
 
         val intent = Intent(this, RecordsActivity::class.java)
-        textoHistorial.setText("")
+        textoHistorial.setText(historial)
         etNumber.requestFocus() // Recuperamos el focus en el texto
 
 
-        /*
-        // DESCOMENTAR ESTA LÍNEA PARA HACER TESTEOS. TE DA EL NUMERO A ADIVINAR.
+
         var trampa = findViewById<TextView>(R.id.trampa)
-        trampa.setText(numeroRandom.toString())
-        */
+        // DESCOMENTAR ESTA LÍNEA PARA HACER TESTEOS. TE DA EL NUMERO A ADIVINAR.
+        //trampa.setText(numeroRandom.toString())*/
+        trampa.setText("") //comenta esta linea y descomenta la de arriba
 
 
         fun procesarIntento() {
@@ -64,18 +63,30 @@ class MainActivity : AppCompatActivity() {
                 val numeroIntroducido = etNumber.text.toString().toInt()
                 if (numeroIntroducido == numeroRandom) {
                     textoHistorial.append("Intento " + numeroIntentos +": ¡HAS ACERTADO EL NÚMERO!\n")
+                    val etNombre = EditText(this)
+                    etNombre.hint = "Introduce tu nombre..."
                     val builder: AlertDialog.Builder = AlertDialog.Builder(this)
                     builder
                         .setMessage("Enhorabuena! Has acertado en " + numeroIntentos + " intentos.")
                         .setTitle("¡HAS GANADO!")
-                        .setPositiveButton("Aceptar") { dialog, which ->
+                        .setView(etNombre)
+                        .setPositiveButton("Guardar") { dialog, which ->
                             numeroRandom = (Math.random() * 100 + 1).toInt()
                             intentos.setText("INTENTOS: 0")
                             intent.putExtra("intentos", numeroIntentos)
+                            intent.putExtra("nombre", etNombre.text.toString())
+                            textoHistorial.setText("")
                             numeroIntentos = 0
                             etNumber.setText("")
+                            historial = ""
                             startActivity(intent)
-
+                        }.setNegativeButton("Cancelar") { dialog, which ->
+                            numeroRandom = (Math.random() * 100 + 1).toInt()
+                            intentos.setText("INTENTOS: 0")
+                            textoHistorial.setText("")
+                            numeroIntentos = 0
+                            etNumber.setText("")
+                            historial = ""
                         }
                     val dialog: AlertDialog = builder.create()
                     dialog.show()
@@ -96,6 +107,8 @@ class MainActivity : AppCompatActivity() {
                     }
                     etNumber.setText("")
                 }
+                // .text obtiene el contenido/texto del TextView (CharSequence) y .toString() lo convierte a String para poder guardarlo.
+                historial = textoHistorial.text.toString();
                 scrollView.post {
                     scrollView.fullScroll(View.FOCUS_DOWN)
                 }
@@ -124,7 +137,12 @@ class MainActivity : AppCompatActivity() {
                 false
             }
         }
-
+    } // Fin del onCreate
+    // Companion Objects
+    companion object {
+        var numeroRandom: Int = (Math.random() * 100 + 1).toInt() // 1 to 100
+        // INT de numero de intentos. Se actualiza con ++ cada vez q le da al botón
+        var numeroIntentos = 0
+        var historial = ""
     }
-
 }
